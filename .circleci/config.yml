@@ -83,6 +83,39 @@ jobs:
       - store_artifacts:
           path: ./Backend/test_results  
 
+  analyze-frontend:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run:
+          name: Frontend Analyze
+          command: |
+            cd frontend
+            npm install
+      - run:
+          name: Analyze the Frontend code
+          command: |
+            cd frontend
+            npm audit --audit-level=critical 
+
+  analyze-backend:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run:
+          name: Backendend Analyze
+          command: |
+            cd backend
+            npm install
+      - run:
+          name: Analyze the Front End code
+          command: |
+            cd frontend
+            npm audit --audit-level=critical 
+
+
 workflows:
   default:
     jobs:
@@ -90,8 +123,14 @@ workflows:
       - test-frontend:
           requires: 
             - build-frontend
+      - analyze-frontend:
+          requires:
+            - test-frontend
 
       - build-backend
       - test-backend:
           requires: 
             - build-backend
+      - analyze-backend:
+          requires:
+            - test-backend
