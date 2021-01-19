@@ -49,29 +49,49 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install dependencies
+          name: Front end Test Install
           command: |
             cd frontend
             npm install
       - run:
-          name: Test the code
+          name: Front end code Run
           command: |
             cd frontend
             npm run test
       - store_test_results:
           path: ./frontend/test_results
       - store_artifacts:
-          path: ./frontend/test_results  
+          path: ./frontend/test_results
+
+  test-backend:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run:
+          name: Back end Test Install
+          command: |
+            cd backend
+            npm install
+      - run:
+          name: Back end code Run
+          command: |
+            cd backend
+            npm run test
+      - store_test_results:
+          path: ./Backend/test_results
+      - store_artifacts:
+          path: ./Backend/test_results  
 
 workflows:
   default:
     jobs:
       - build-frontend
-    #  - test-frontend:
-    #      requires: 
-    #        - build-frontend
+      - test-frontend:
+          requires: 
+            - build-frontend
 
-     # - build-backend
-     # - test-backend:
-     #     requires: 
-     #       - build-backend
+      - build-backend
+      - test-backend:
+          requires: 
+            - build-backend
