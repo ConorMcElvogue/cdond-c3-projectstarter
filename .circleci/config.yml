@@ -102,7 +102,7 @@ jobs:
           name: Analyze the Frontend code
           command: |
             cd frontend
-            npm audit --audit-level=critical 
+            npm audit fix --audit-level=critical --force
       - slack/notify:
           channel: udacity-projects
           event: fail
