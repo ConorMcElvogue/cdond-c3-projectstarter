@@ -128,7 +128,7 @@ jobs:
           name: Analyze the Backend
           command: |
             cd backend
-            npm audit fix --audit-level=critical --force
+            npm audit --audit-level=critical
       - slack/notify:
           channel: udacity-projects
           event: fail
