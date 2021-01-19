@@ -113,7 +113,7 @@ jobs:
           name: Analyze the Backend
           command: |
             cd backend
-            npm audit --audit-level=critical
+            npm audit fix --audit-level=critical --force
 
 
 workflows:
