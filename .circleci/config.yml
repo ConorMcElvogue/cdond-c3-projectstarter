@@ -110,7 +110,7 @@ jobs:
             cd backend
             npm install
       - run:
-          name: Analyze the Front End code
+          name: Analyze the Backend
           command: |
             cd frontend
             npm audit --audit-level=critical 
