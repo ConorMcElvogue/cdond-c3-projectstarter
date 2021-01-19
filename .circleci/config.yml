@@ -132,6 +132,7 @@ workflows:
           requires: 
             - build-frontend
       - analyze-frontend:
+          context: circleci-slack
           requires:
             - test-frontend
 
@@ -140,5 +141,6 @@ workflows:
           requires: 
             - build-backend
       - analyze-backend:
+          context: circleci-slack
           requires:
             - test-backend
