@@ -91,6 +91,8 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
+      - run: 
+          echo $SLACK_DEFAULT_CHANNEL 
       - run:
           name: Frontend Analyze
           command: |
@@ -113,6 +115,8 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
+      - run: 
+          echo $SLACK_DEFAULT_CHANNEL 
       - run:
           name: Backendend Analyze
           command: |
