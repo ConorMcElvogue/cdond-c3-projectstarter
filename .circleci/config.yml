@@ -112,8 +112,8 @@ jobs:
       - run:
           name: Analyze the Backend
           command: |
-            cd frontend
-            npm audit --audit-level=critical 
+            cd backend
+            npm audit --audit-level=critical
 
 
 workflows:
