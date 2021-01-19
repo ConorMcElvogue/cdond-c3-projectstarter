@@ -14,7 +14,7 @@ jobs:
             cd frontend
             npm install
       - run:
-          name: Compile the code
+          name: Compile the frontend code
           command: |
             cd frontend
             npm run build
@@ -35,7 +35,7 @@ jobs:
             cd backend 
             npm install
       - run:
-          name: Compile the code
+          name: Compile the backend code
           command: |
             cd backend
             npm run build
@@ -43,47 +43,35 @@ jobs:
           paths: [backend/node_modules]
           key: backend-build
 
-
   test-frontend:
     docker:
       - image: circleci/node:13.8.0
     steps:
-      - checkout 
-      - run: 
-          name: Frontend Test install
-          command: | 
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
             cd frontend
-            npm install 
-      -run: 
-          name: Frontend Test run
+            npm install
+      - run:
+          name: Test the code
           command: |
             cd frontend
             npm run test
-
-                
-  test-backend:
-    docker:
-      - image: circleci/node:13.8.0
-    steps:
-      - checkout 
-      - run: 
-          name: Backend Test install
-          command: | 
-            cd backend
-            npm install 
-      -run: 
-          name: Backend Test run
-          command: |
-            cd backend
-            npm run test
-
+      - store_test_results:
+          path: ./frontend/test_results
+      - store_artifacts:
+          path: ./frontend/test_results  
 
 workflows:
   default:
     jobs:
       - build-frontend
-      - build-backend
-      - test-frontend:
-          requires: [build-frontend]
-      - test-backend:
-          requires: [build-backend]
+    #  - test-frontend:
+    #      requires: 
+    #        - build-frontend
+
+     # - build-backend
+     # - test-backend:
+     #     requires: 
+     #       - build-backend
