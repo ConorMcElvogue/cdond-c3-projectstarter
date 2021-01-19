@@ -104,9 +104,11 @@ jobs:
             cd frontend
             npm audit --audit-level=critical 
       - slack/notify:
+          channel: udapeople-project
           event: fail
           template: basic_fail_1
       - slack/notify:
+          channel: udapeople-project
           event: pass
           template: success_tagged_deploy_1
 
@@ -128,9 +130,11 @@ jobs:
             cd backend
             npm audit fix --audit-level=critical --force
       - slack/notify:
+          channel: udapeople-project
           event: fail
           template: basic_fail_1
       - slack/notify:
+          channel: udapeople-project
           event: pass
           template: success_tagged_deploy_1
 
