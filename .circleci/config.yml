@@ -288,9 +288,11 @@ workflows:
           requires:
             -  build-frontend
       - analyze-backend:
+          context: circleci-slack
           requires:
             - build-backend
       - analyze-frontend:
+          context: circleci-slack
           requires:
             - build-frontend
 
