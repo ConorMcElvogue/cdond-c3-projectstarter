@@ -210,33 +210,110 @@ jobs:
             cat inventory.txt
             ansible-playbook -i inventory.txt configure-server.yml
 
+  run-migrations:
+    docker: 
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Install AWS CLI dependencies
+          working_directory: /tmp
+          command: |
+            sudo apt-get update && sudo apt-get install -yy less
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+      - run:
+          name: Run migrations
+          working_directory: ./backend
+          command: |
+            npm run migrations > migration_status
+      - run:
+          name: Send migration results to memstash
+          working_directory: ./backend
+          command: |
+            if grep -q "has been executed successfully" migration_status
+            then
+              echo "migration complete"
+              curl -H "Content-Type: text/plain" -H "token: 30e34287-555c-47da-9280-a30c036c0cc8" --request PUT --data "success" https://api.memstash.io/values/DB_MIGRATION_${WorkFlowID}
+            else
+              echo "DB migration failure"
+              curl -H "Content-Type: text/plain" -H "token: 30e34287-555c-47da-9280-a30c036c0cc8" --request PUT --data "failure" https://api.memstash.io/values/DB_MIGRATION_${WorkFlowID}
+            fi
+            echo "WorkflowID=${WorkFlowID}"
+
+  deploy-frontend:
+    docker: 
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Install AWS CLI dependencies
+          working_directory: /tmp
+          command: |
+            sudo apt-get update && sudo apt-get install -yy less
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+      - run:
+          name: Rebuild frontend from backend URL
+          working_directory: ./frontend
+          command: |
+            export API_URL=$(curl -H "token: 3f00469f-a5c5-47c4-b894-bb2becdab85a" --request GET https://api.memstash.io/values/BACKEND_URL)
+            echo "${API_URL}"
+            npm run build
+      - run:
+          name: Deploy frontend objects to S3
+          working_directory: ./frontend
+          command: |
+            aws s3 cp ./dist "s3://udapeople-${WorkFlowID}" --recursive
+      - persist_to_workspace:
+          root: .
+          paths:
+            - frontend/dist
 
 workflows:
   default:
     jobs:
-   #   - build-frontend
-   #   - test-frontend:
-   #       requires: 
-   #         - build-frontend
-   #   - analyze-frontend:
-   ##       context: circleci-slack
-   #       requires:
-   #         - test-frontend
-#
-#      - build-backend
-#      - test-backend:
- #         requires: 
-  #          - build-backend
- #     - analyze-backend:
- ##         context: circleci-slack
- #         requires:
- #           - test-backend#
-#
+      - build-backend
+      - build-frontend
+      - test-backend:
+          requires:
+            - build-backend
+      - test-frontend:
+          requires:
+            -  build-frontend
+      - analyze-backend:
+          requires:
+            - build-backend
+      - analyze-frontend:
+          requires:
+            - build-frontend
+
+      ## INFRASTRUCTURE
       - deploy-infrastructure:
           filters:
             branches:
-              only: master
-
+              only:
+                - master
       - configure-infrastructure:
           requires:
             - deploy-infrastructure
+      - run-migrations:
+          requires:
+            - test-backend
+            - test-frontend
+            - analyze-backend
+            - analyze-frontend
+            - configure-infrastructure
+          filters:
+            branches:
+              only:
+                - master
+      - deploy-frontend:
+          requires:
+            - run-migrations
