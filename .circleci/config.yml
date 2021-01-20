@@ -185,6 +185,31 @@ jobs:
           paths:
             - .circleci/ansible/inventory.txt
 
+
+  configure-infrastructure:
+    executor: python
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: ["50:36:20:79:21:43:f6:97:21:f7:e3:ab:24:73:bf:af"]
+      - attach_workspace:
+          at: .
+      - run:
+          name: Install dependencies
+          working_directory: ./.circleci/ansible
+          command: |
+            apk add --update ansible
+            ansible --version
+      - run:
+          name: Configure server
+          working_directory: ./.circleci/ansible
+          command: |
+            pwd &&
+            ls -la
+            cat inventory
+            ansible-playbook -i inventory configure-server.yaml
+
+
 workflows:
   default:
     jobs:
@@ -210,3 +235,7 @@ workflows:
           filters:
             branches:
               only: master
+
+      - configure-infrastructure:
+          requires:
+            - deploy-infrastructure
