@@ -208,30 +208,30 @@ jobs:
             pwd &&
             ls -la
             cat inventory.txt
-            ansible-playbook -i inventory configure-server.yml
+            ansible-playbook -i inventory.txt configure-server.yml
 
 
 workflows:
   default:
     jobs:
-      - build-frontend
-      - test-frontend:
-          requires: 
-            - build-frontend
-      - analyze-frontend:
-          context: circleci-slack
-          requires:
-            - test-frontend
-
-      - build-backend
-      - test-backend:
-          requires: 
-            - build-backend
-      - analyze-backend:
-          context: circleci-slack
-          requires:
-            - test-backend
-
+   #   - build-frontend
+   #   - test-frontend:
+   #       requires: 
+   #         - build-frontend
+   #   - analyze-frontend:
+   ##       context: circleci-slack
+   #       requires:
+   #         - test-frontend
+#
+#      - build-backend
+#      - test-backend:
+ #         requires: 
+  #          - build-backend
+ #     - analyze-backend:
+ ##         context: circleci-slack
+ #         requires:
+ #           - test-backend#
+#
       - deploy-infrastructure:
           filters:
             branches:
