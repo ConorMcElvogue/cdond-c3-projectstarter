@@ -227,12 +227,12 @@ jobs:
             sudo ./aws/install
       - run:
           name: Run migrations
-          working_directory: ./backend
+          working_directory: ./backend/src
           command: |
             npm run migrations > migration_status
       - run:
           name: Send migration results to memstash
-          working_directory: ./backend
+          working_directory: ./backend/src
           command: |
             if grep -q "has been executed successfully" migration_status
             then
