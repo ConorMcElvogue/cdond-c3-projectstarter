@@ -225,14 +225,20 @@ jobs:
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
             unzip awscliv2.zip
             sudo ./aws/install
+
       - run:
-          name: Run migrations
-          working_directory: ./backend/src
+          name: install npm
           command: |
-            npm run migrations > migration_status
+            cd backend
+            npm install
+      - run:
+          name: run migrations
+          command: |
+            cd backend
+            npm run run migrations > migration_status
       - run:
           name: Send migration results to memstash
-          working_directory: ./backend/src
+          working_directory: ./backend/
           command: |
             if grep -q "has been executed successfully" migration_status
             then
@@ -243,6 +249,10 @@ jobs:
               curl -H "Content-Type: text/plain" -H "token: 30e34287-555c-47da-9280-a30c036c0cc8" --request PUT --data "failure" https://api.memstash.io/values/DB_MIGRATION_${WorkFlowID}
             fi
             echo "WorkflowID=${WorkFlowID}"
+
+
+
+
 
   deploy-frontend:
     docker: 
