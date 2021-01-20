@@ -144,14 +144,6 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Create/Update frontend infrastructure via AWS CloudFormation
-          command: |
-            aws cloudformation deploy \
-              --stack-name udapeople-frontend-${WorkFlowID} \
-              --template-file .circleci/files/frontend.yml \
-              --region ${AWS_DEFAULT_REGION} \
-              --parameter-overrides ID="${WorkFlowID}"
-      - run:
           name: Create/Update backend infrastructure via AWS CloudFormation
           command: |
             aws cloudformation deploy \
@@ -160,15 +152,35 @@ jobs:
               --region ${AWS_DEFAULT_REGION} \
               --parameter-overrides ID="${WorkFlowID}"
       - run:
-          name: Get and save public DNS of EC2 instance to https://memstash.io/
+          name: Save backend URL in memstash
           command: |
-            PUBLIC_DNS=$(aws ec2 describe-instances --region ${AWS_DEFAULT_REGION} --filters 'Name=tag:Name,Values=udapeople-backend-ec2-*' --query "Reservations[*].Instances[0].PublicDnsName" --output text)
-            echo ${PUBLIC_DNS}
-            curl -H "Content-Type: text/plain" \
-               -H "token: ${CIRCLE_WORKFLOW_ID}" \
-               --request PUT \
-               --data ${PUBLIC_DNS} \
-               https://api.memstash.io/values/public_dns
+            BACKEND_IP=$(aws ec2 describe-instances \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters "Name=tag:project,Values=udapeople-backend-${WorkFlowID}" \
+              --output text)
+              
+            curl -H "Content-Type: text/plain" -H "token: 3f00469f-a5c5-47c4-b894-bb2becdab85a" --request PUT --data "http://$BACKEND_IP:3030" https://api.memstash.io/values/BACKEND_URL
+      - run:
+          name: Create/Update frontend infrastructure via AWS CloudFormation
+          command: |
+            aws cloudformation deploy \
+              --stack-name udapeople-frontend-${WorkFlowID} \
+              --template-file .circleci/files/frontend.yml \
+              --region ${AWS_DEFAULT_REGION} \
+              --parameter-overrides ID="${WorkFlowID}"
+      - run:
+          name: Add backend ip to ansible inventory
+          working_directory: ./.circleci/ansible
+          command: |
+            aws ec2 describe-instances \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters "Name=tag:project,Values=udapeople-backend-${WorkFlowID}" \
+              --output text >> inventory
+            cat inventory
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .circleci/ansible/inventory
 
 workflows:
   default:
