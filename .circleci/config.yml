@@ -147,18 +147,18 @@ jobs:
           name: Create/Update frontend infrastructure via AWS CloudFormation
           command: |
             aws cloudformation deploy \
-              --stack-name udapeople-frontend-${WorkflowID} \
+              --stack-name udapeople-frontend-whwgsaq1232 \
               --template-file .circleci/files/frontend.yml \
               --region ${AWS_DEFAULT_REGION} \
-              --parameter-overrides ID="${WorkflowID}"
+              --parameter-overrides ID="whwgsaq1232"
       - run:
           name: Create/Update backend infrastructure via AWS CloudFormation
           command: |
             aws cloudformation deploy \
-              --stack-name udapeople-backend-${WorkflowID} \
+              --stack-name udapeople-backend-whwgsaq1232 \
               --template-file .circleci/files/backend.yml \
               --region ${AWS_DEFAULT_REGION} \
-              --parameter-overrides ID="${WorkflowID}"
+              --parameter-overrides ID="whwgsaq1232"
       - run:
           name: Get and save public DNS of EC2 instance to https://memstash.io/
           command: |
