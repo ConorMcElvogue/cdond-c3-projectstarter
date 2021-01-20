@@ -235,7 +235,7 @@ jobs:
           name: run migrations
           command: |
             cd backend
-            npm run run migrations > migration_status
+            npm run migrations > migration_status
       - run:
           name: Send migration results to memstash
           working_directory: ./backend/
