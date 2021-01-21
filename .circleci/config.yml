@@ -178,12 +178,12 @@ jobs:
             aws ec2 describe-instances \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --filters "Name=tag:project,Values=udapeople-backend-${WorkFlowID}" \
-              --output text >> inventory
-            cat inventory
+              --output text >> .circleci/ansible/inventory.txt
+            cat .circleci/ansible/inventory.txt
       - persist_to_workspace:
           root: .
           paths:
-            - .circleci/ansible/inventory.txt
+            - project/.circleci/ansible/inventory.txt
 
 
   configure-infrastructure:
@@ -203,12 +203,9 @@ jobs:
             ansible --version
       - run:
           name: Configure server
-          working_directory: ./.circleci/ansible
           command: |
-            pwd &&
-            ls -la
-            cat inventory
-            ansible-playbook -i inventory configure-server.yml
+            cd .circleci/ansible
+            ansible-playbook -i inventory.txt configure-server.yml
 
   run-migrations:
     docker: 
