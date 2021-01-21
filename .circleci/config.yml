@@ -202,7 +202,7 @@ jobs:
           command: |
             apk add --update ansible
             ansible --version
-     - run:
+      - run:
           name: Set up env vars
           command: |
             echo TYPEORM_HOST=${TYPEORM_HOST} >> backend/.env
