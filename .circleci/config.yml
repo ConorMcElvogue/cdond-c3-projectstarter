@@ -240,7 +240,7 @@ jobs:
           name: run migrations
           command: |
             cd backend
-            npm run build
+            npm run migrations
       - run:
           name: Send migration results to memstash
           working_directory: ./backend/
@@ -320,13 +320,13 @@ workflows:
       - configure-infrastructure:
           requires:
             - deploy-infrastructure
-#      - run-migrations:
-#          requires:
-#            - test-backend
-#            - test-frontend
-#            - analyze-backend
-#            - analyze-frontend
-#            - configure-infrastructure
+      - run-migrations:
+          requires:
+            - test-backend
+            - test-frontend
+            - analyze-backend
+            - analyze-frontend
+            - configure-infrastructure
 #          filters:
 #            branches:
 #              only:
