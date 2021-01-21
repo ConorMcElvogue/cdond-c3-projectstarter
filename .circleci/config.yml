@@ -183,7 +183,7 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - project/.circleci/ansible/inventory.txt
+            - .circleci/ansible/inventory.txt
 
 
   configure-infrastructure:
@@ -312,17 +312,17 @@ workflows:
       - configure-infrastructure:
           requires:
             - deploy-infrastructure
-      - run-migrations:
-          requires:
-            - test-backend
-            - test-frontend
-            - analyze-backend
-            - analyze-frontend
-            - configure-infrastructure
-          filters:
-            branches:
-              only:
-                - master
-      - deploy-frontend:
-          requires:
-            - run-migrations
+#      - run-migrations:
+#          requires:
+#            - test-backend
+#            - test-frontend
+#            - analyze-backend
+#            - analyze-frontend
+#            - configure-infrastructure
+#          filters:
+#            branches:
+#              only:
+#                - master
+#      - deploy-frontend:
+#          requires:
+#            - run-migrations
