@@ -207,8 +207,8 @@ jobs:
           command: |
             pwd &&
             ls -la
-            cat inventory.txt
-            ansible-playbook -i inventory.txt configure-server.yml
+            cat inventory
+            ansible-playbook -i inventory configure-server.yml
 
   run-migrations:
     docker: 
