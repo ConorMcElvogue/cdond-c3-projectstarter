@@ -147,40 +147,28 @@ jobs:
           name: Install dependencies
           command: yum install -y tar gzip
       - run:
-          name: Create/Update backend infrastructure via AWS CloudFormation
+          name: Ensure that the backend infrastructure exists
           command: |
             aws cloudformation deploy \
-              --stack-name udapeople-backend-${WorkFlowID} \
               --template-file .circleci/files/backend.yml \
-              --region ${AWS_DEFAULT_REGION} \
-              --parameter-overrides ID="${WorkFlowID}"
+              --stack-name "udapeople-backend-${WorkFlowID}" \
+              --parameter-overrides ID="${WorkFlowID}" \
+              --tags project=udaPeople
+            URLS=$(aws ec2 describe-instances --region ${AWS_DEFAULT_REGION} --query "Reservations[*].Instances[*].PublicIpAddress"  --filters "Name=tag:Name,Values=backend-${WorkFlowID}"  --output text)
+            echo "URLS=$URLS"
+            echo "${WorkFlowID}"
+            curl -H "Content-Type: text/plain" -H "token: b389b111-c711-4205-b979-6105bf24dcee" --request PUT --data "$URLS" https://api.memstash.io/values/url_${WorkFlowID}
       - run:
-          name: Save backend URL in memstash
-          command: |
-            BACKEND_IP=$(aws ec2 describe-instances \
-              --query 'Reservations[*].Instances[*].PublicIpAddress' \
-              --filters "Name=tag:project,Values=udapeople-backend-${WorkFlowID}" \
-              --output text)
-              
-            curl -H "Content-Type: text/plain" -H "token: 3f00469f-a5c5-47c4-b894-bb2becdab85a" --request PUT --data "BACKEND_IP" https://api.memstash.io/values/url_${WorkFlowID}
-      - run:
-          name: Create/Update frontend infrastructure via AWS CloudFormation
+          name: Ensure that the frontend infrastructure exists
           command: |
             aws cloudformation deploy \
-              --stack-name udapeople-frontend-${WorkFlowID} \
               --template-file .circleci/files/frontend.yml \
-              --region ${AWS_DEFAULT_REGION} \
-              --parameter-overrides ID="${WorkFlowID}"
-      - run:
-          name: Add backend ip to ansible inventory
-          working_directory: ./.circleci/ansible
-          command: |
-            aws ec2 describe-instances \
-              --region "$AWS_DEFAULT_REGION" \
-              --query 'Reservations[*].Instances[*].PublicIpAddress' \
-              --filters "Name=tag:project,Values=udapeople-backend-${WorkFlowID}" \
-              --output text >> inventory.txt
-            cat inventory.txt
+              --stack-name "udapeople-frontend-${WorkFlowID}" \
+              --parameter-overrides ID="${WorkFlowID}" \
+              --tags project=udaPeople
+              ARN=$(aws s3 ls | grep udapeople)
+              echo "ARN=$ARN"
+              curl -H "Content-Type: text/plain" -H "token: e2a60db0-bc3c-46fe-ad15-36e00ba41dea" --request PUT --data "$ARN" https://api.memstash.io/values/arn_${WorkFlowID}
       - persist_to_workspace:
           root: .
           paths:
@@ -188,42 +176,44 @@ jobs:
 
 
   configure-infrastructure:
-    docker: 
-      - image: python:3.9.0-alpine
-    steps:
-      - checkout
-      - add_ssh_keys:
-          fingerprints: ["50:36:20:79:21:43:f6:97:21:f7:e3:ab:24:73:bf:af"]
-      - attach_workspace:
-          at: .
-      - run:
-          name: Install dependencies
-          working_directory: .circleci/ansible
-          command: |
-            apk add --update ansible
-            ansible --version
-      - run:
-          name: Set up inventory file
-          command: |
-            cd .circleci/ansible
-            echo "[web]" >> inventory.txt
-            URLS=$(curl -H "token: 3f00469f-a5c5-47c4-b894-bb2becdab85a" --request GET https://api.memstash.io/values/url_${WorkFlowID})
-            echo "$URLS" >> inventory.txt
-            cat inventory.txt
-      - run:
-          name: Set up env vars
-          command: |
-            echo TYPEORM_HOST=${TYPEORM_HOST} >> backend/.env
-            echo TYPEORM_PORT=${TYPEORM_PORT} >> backend/.env
-            echo TYPEORM_USERNAME=${TYPEORM_USERNAME} >> backend/.env
-            echo TYPEORM_PASSWORD=${TYPEORM_PASSWORD} >> backend/.env
-            echo TYPEORM_DATABASE=${TYPEORM_DATABASE} >> backend/.env
-      - run:
-          name: Configure server
-          no_output_timeout: 30m
-          command: |
-            cd .circleci/ansible
-            ansible-playbook -i inventory.txt configure-server.yml
+      docker:
+        - image: python:3.7-alpine3.11
+      steps:
+        - checkout
+        - attach_workspace:
+            at: .
+        - add_ssh_keys:
+            fingerprints: ["50:36:20:79:21:43:f6:97:21:f7:e3:ab:24:73:bf:af"]
+        - run:
+            name: Install dependencies
+            command: |
+              apk add --update tar gzip ansible nodejs npm curl
+              pip install awscli
+        - run:
+            name: Set up inventory file
+            command: |
+              cd .circleci/ansible
+              echo "[web]" >> inventory.txt
+              URLS=$(curl -H "token: b389b111-c711-4205-b979-6105bf24dcee" --request GET https://api.memstash.io/values/url_${WorkFlowID})
+              echo "$URLS" >> inventory.txt
+              cat inventory.txt
+        - run:
+            name: Configure server with ansible
+            no_output_timeout: 30m
+            command: |
+              echo ENVIROMENT=production > "backend/.env"
+              echo TYPEORM_CONNECTION=postgres >> "backend/.env"
+              echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> "backend/.env"
+              echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "backend/.env"
+              echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> "backend/.env"
+              echo TYPEORM_HOST=$TYPEORM_HOST >> "backend/.env"
+              echo TYPEORM_PORT=$TYPEORM_PORT >> "backend/.env"
+              echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"
+              echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
+              echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
+              cd .circleci/ansible
+              ansible-playbook -i inventory.txt configure-server.yml
+        
 
   run-migrations:
     docker: 
