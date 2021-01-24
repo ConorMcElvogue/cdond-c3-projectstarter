@@ -289,7 +289,47 @@ jobs:
           paths:
             - frontend/dist
 
+
 workflows:
   default:
     jobs:
-      - deploy-frontend
+      - build-backend
+      - build-frontend
+      - test-backend:
+          requires:
+            - build-backend
+      - test-frontend:
+          requires:
+            -  build-frontend
+      - analyze-backend:
+          context: circleci-slack
+          requires:
+            - build-backend
+      - analyze-frontend:
+          context: circleci-slack
+          requires:
+            - build-frontend
+
+      ## INFRASTRUCTURE
+      - deploy-infrastructure:
+          filters:
+            branches:
+              only:
+                - master
+      - configure-infrastructure:
+          requires:
+            - deploy-infrastructure
+      - run-migrations:
+          requires:
+            - test-backend
+            - test-frontend
+            - analyze-backend
+            - analyze-frontend
+            - configure-infrastructure
+          filters:
+            branches:
+              only:
+                - master
+      - deploy-frontend:
+          requires:
+            - run-migrations
