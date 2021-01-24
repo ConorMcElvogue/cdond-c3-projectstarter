@@ -273,7 +273,7 @@ jobs:
           name: Rebuild frontend from backend URL
           working_directory: ./frontend
           command: |
-            export BACKEND_IP=$(curl -H "token: 3f00469f-a5c5-47c4-b894-bb2becdab85a" --request GET https://api.memstash.io/values/url_${WorkFlowID})
+            export BACKEND_IP=$(curl -H "token: 7de83cae-8940-4867-b238-f6888e668f1a" --request GET https://api.memstash.io/values/url_${WorkFlowID})
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
             cd frontend
@@ -292,43 +292,4 @@ jobs:
 workflows:
   default:
     jobs:
-      - build-backend
-      - build-frontend
-      - test-backend:
-          requires:
-            - build-backend
-      - test-frontend:
-          requires:
-            -  build-frontend
-      - analyze-backend:
-          context: circleci-slack
-          requires:
-            - build-backend
-      - analyze-frontend:
-          context: circleci-slack
-          requires:
-            - build-frontend
-
-      ## INFRASTRUCTURE
-      - deploy-infrastructure:
-          filters:
-            branches:
-              only:
-                - master
-      - configure-infrastructure:
-          requires:
-            - deploy-infrastructure
-      - run-migrations:
-          requires:
-            - test-backend
-            - test-frontend
-            - analyze-backend
-            - analyze-frontend
-            - configure-infrastructure
-          filters:
-            branches:
-              only:
-                - master
-      - deploy-frontend:
-          requires:
-            - run-migrations
+      - deploy-frontend
