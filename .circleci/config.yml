@@ -271,7 +271,6 @@ jobs:
             yum install -y nodejs
       - run:
           name: Rebuild frontend from backend URL
-          working_directory: ./frontend
           command: |
             export BACKEND_IP=$(curl -H "token: 7de83cae-8940-4867-b238-f6888e668f1a" --request GET https://api.memstash.io/values/url_${WorkFlowID})
             export API_URL="http://${BACKEND_IP}:3030"
