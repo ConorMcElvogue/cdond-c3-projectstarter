@@ -245,7 +245,7 @@ jobs:
           name: Send migration results to memstash
           working_directory: ./backend/
           command: |
-            if grep -q "has been executed successfully" migration_status
+            if grep -q "has been executed successfully" migration_output.txt
             then
               echo "migration complete"
               curl -H "Content-Type: text/plain" -H "token: 832b0a9e-0757-4297-9e0b-a0775e58e5c2" --request PUT --data "success" https://api.memstash.io/values/DB_MIGRATION_${WorkFlowID}
@@ -290,43 +290,4 @@ jobs:
 workflows:
   default:
     jobs:
-      - build-backend
-      - build-frontend
-      - test-backend:
-          requires:
-            - build-backend
-      - test-frontend:
-          requires:
-            -  build-frontend
-      - analyze-backend:
-          context: circleci-slack
-          requires:
-            - build-backend
-      - analyze-frontend:
-          context: circleci-slack
-          requires:
-            - build-frontend
-
-      ## INFRASTRUCTURE
-      - deploy-infrastructure:
-          filters:
-            branches:
-              only:
-                - master
-      - configure-infrastructure:
-          requires:
-            - deploy-infrastructure
-      - run-migrations:
-          requires:
-            - test-backend
-            - test-frontend
-            - analyze-backend
-            - analyze-frontend
-            - configure-infrastructure
-#          filters:
-#            branches:
-#              only:
-#                - master
-#      - deploy-frontend:
-#          requires:
-#            - run-migrations
+      - run-migrations
