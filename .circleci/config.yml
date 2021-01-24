@@ -256,25 +256,24 @@ jobs:
               echo "WorkflowID=${WorkFlowID}"
 
   deploy-frontend:
-    docker: 
-      - image: circleci/node:13.8.0
+    docker:
+      - image: amazon/aws-cli
     steps:
       - checkout
-      - attach_workspace:
-          at: .
       - run:
-          name: Install AWS CLI dependencies
-          working_directory: /tmp
+          name: Install dependencies
           command: |
-            sudo apt-get update && sudo apt-get install -yy less
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip awscliv2.zip
-            sudo ./aws/install
+            yum install tar -y
+            yum install gzip -y
+            yum install python3-pip -y
+            yum -y install curl -y
+            curl --silent --location https://rpm.nodesource.com/setup_14.x | bash -
+            yum install -y nodejs
       - run:
           name: Rebuild frontend from backend URL
           working_directory: ./frontend
           command: |
-            export API_URL=$(curl -H "token: 3f00469f-a5c5-47c4-b894-bb2becdab85a" --request GET https://api.memstash.io/values/BACKEND_URL)
+            export API_URL=$(curl -H "token: 3f00469f-a5c5-47c4-b894-bb2becdab85a" --request GET https://api.memstash.io/values/url_${WorkFlowID})
             echo "${API_URL}"
             npm run build
       - run:
@@ -290,4 +289,4 @@ jobs:
 workflows:
   default:
     jobs:
-      - run-migrations
+      - deploy-frontend
