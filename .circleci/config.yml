@@ -157,7 +157,7 @@ jobs:
             URLS=$(aws ec2 describe-instances --region ${AWS_DEFAULT_REGION} --query "Reservations[*].Instances[*].PublicIpAddress"  --filters "Name=tag:Name,Values=backend-${WorkFlowID}"  --output text)
             echo "URLS=$URLS"
             echo "${WorkFlowID}"
-            curl -H "Content-Type: text/plain" -H "token: b389b111-c711-4205-b979-6105bf24dcee" --request PUT --data "$URLS" https://api.memstash.io/values/url_${WorkFlowID}
+            curl -H "Content-Type: text/plain" -H "token: 7de83cae-8940-4867-b238-f6888e668f1a" --request PUT --data "$URLS" https://api.memstash.io/values/url_${WorkFlowID}
       - run:
           name: Ensure that the frontend infrastructure exists
           command: |
@@ -168,7 +168,7 @@ jobs:
               --tags project=udaPeople
               ARN=$(aws s3 ls | grep udapeople)
               echo "ARN=$ARN"
-              curl -H "Content-Type: text/plain" -H "token: e2a60db0-bc3c-46fe-ad15-36e00ba41dea" --request PUT --data "$ARN" https://api.memstash.io/values/arn_${WorkFlowID}
+              curl -H "Content-Type: text/plain" -H "token: 60bcf487-712b-421c-821b-b54680a77731" --request PUT --data "$ARN" https://api.memstash.io/values/arn_${WorkFlowID}
       - persist_to_workspace:
           root: .
           paths:
@@ -194,7 +194,7 @@ jobs:
             command: |
               cd .circleci/ansible
               echo "[web]" >> inventory.txt
-              URLS=$(curl -H "token: b389b111-c711-4205-b979-6105bf24dcee" --request GET https://api.memstash.io/values/url_${WorkFlowID})
+              URLS=$(curl -H "token: 7de83cae-8940-4867-b238-f6888e668f1a" --request GET https://api.memstash.io/values/url_${WorkFlowID})
               echo "$URLS" >> inventory.txt
               cat inventory.txt
         - run:
@@ -248,10 +248,10 @@ jobs:
             if grep -q "has been executed successfully" migration_status
             then
               echo "migration complete"
-              curl -H "Content-Type: text/plain" -H "token: 30e34287-555c-47da-9280-a30c036c0cc8" --request PUT --data "success" https://api.memstash.io/values/DB_MIGRATION_${WorkFlowID}
+              curl -H "Content-Type: text/plain" -H "token: 832b0a9e-0757-4297-9e0b-a0775e58e5c2" --request PUT --data "success" https://api.memstash.io/values/DB_MIGRATION_${WorkFlowID}
             else
               echo "DB migration failure"
-              curl -H "Content-Type: text/plain" -H "token: 30e34287-555c-47da-9280-a30c036c0cc8" --request PUT --data "failure" https://api.memstash.io/values/DB_MIGRATION_${WorkFlowID}
+              curl -H "Content-Type: text/plain" -H "token: 832b0a9e-0757-4297-9e0b-a0775e58e5c2" --request PUT --data "failure" https://api.memstash.io/values/DB_MIGRATION_${WorkFlowID}
             fi
               echo "WorkflowID=${WorkFlowID}"
 
