@@ -210,7 +210,7 @@ jobs:
               echo TYPEORM_PORT=5432 >> "backend/.env"
               echo TYPEORM_USERNAME=postgres >> "backend/.env"
               echo TYPEORM_PASSWORD=Ballerin_123!! >> "backend/.env"
-              echo TYPEORM_DATABASE=udapeople-prod >> "backend/.env"
+              echo TYPEORM_DATABASE=postgres >> "backend/.env"
               cd .circleci/ansible
               ansible-playbook -i inventory.txt configure-server.yml
         
