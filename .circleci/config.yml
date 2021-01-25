@@ -317,31 +317,40 @@ jobs:
             cd .circleci/ansible
             ansible-playbook -i inventory.txt deploy-backend.yml
 
-  smoke-test-backend:
+  smoke-test:
     docker:
       - image: python:3.7-alpine3.11
     steps:
       - checkout
       - run:
-          name: Install dependencies
+          name: Install system dependencies
           command: |
-            cd backend
-            apk add --update ansible
-            apk add --update tar gzip ansible nodejs npm curl jq
-            pip install awscli
-
+            apk add --no-cache curl
+            apk add --no-cache --upgrade bash
+            apk add --no-cache --update ansible
+            apk add --no-cache openssh-client
+            pip3 install awscli
       - run:
-          name: Get backend url and do some test
+          name: Smoke test on backend
           command: |
-            cd backend
-            export BACKENDIP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:Name,Values=backend-${WorkFlowID}" --output text)
-            export BACKENDDNS=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicDnsName' --filters "Name=tag:Name,Values=backend-${WorkFlowID}" --output text)
-
-            echo "BACKENDIP: ${BACKENDIP}"
-            echo "BACKENDNS: ${BACKENDDNS}"
-            echo "BACKENDIP: ${API_URL}"
-            echo "http://${BACKENDIP}:3030"
-            curl "http://${BACKENDIP}:3030/api/status"
+            PUBLIC_IP=$(curl -H "token: 7de83cae-8940-4867-b238-f6888e668f1a" --request GET https://api.memstash.io/values/url_${WorkFlowID})
+            echo ${PUBLIC_IP}
+            if curl -s "http://${PUBLIC_IP}:3030/api/status" | grep "ok"
+            then
+              return 0
+            else
+              return 1
+            fi
+      - run:
+          name: Smoke test on frontend
+          command: |
+            URL="http://udapeople-s3bucket-${WorkFlowID}.s3-website.eu-west-2.amazonaws.com/#/employees"
+            if curl -s ${URL} | grep "Welcome"
+            then
+              return 0
+            else
+              return 1
+            fi
 
 workflows:
   default:
@@ -389,3 +398,10 @@ workflows:
       - deploy-backend:
           requires:
             - run-migrations
+      - smoke-test:
+          requires:
+            - deploy-frontend
+            - deploy-backend
+          filters:
+            branches:
+              only: master
