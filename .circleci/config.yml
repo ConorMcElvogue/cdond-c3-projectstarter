@@ -314,11 +314,7 @@ jobs:
 
             cd . 
             tar -czvf backend.tar.gz ./backend
-            ls -la
-            cd backend
-            ls -la
-            ansible-playbook -i ~/inventory.txt /root/project/.circleci/ansible/deploy-backend.yml
-            cd ./.circleci/ansible
+            cd .circleci/ansible
             ansible-playbook -i inventory.txt deploy-backend.yml
 
 
