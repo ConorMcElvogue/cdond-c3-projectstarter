@@ -300,6 +300,14 @@ jobs:
       - add_ssh_keys:
           fingerprints: ["d8:5b:b9:b0:64:bc:92:e2:7f:b6:da:62:da:e3:2c:5e"]
       - run:
+          name: Set up inventory file
+          command: |
+            cd .circleci/ansible
+            echo "[web]" >> inventory.txt
+            URLS=$(curl -H "token: 7de83cae-8940-4867-b238-f6888e668f1a" --request GET https://api.memstash.io/values/url_${WorkFlowID})
+            echo "$URLS" >> inventory.txt
+            cat inventory.txt
+      - run:
           name: Deploy backend
           no_output_timeout: 10m
           command: |
