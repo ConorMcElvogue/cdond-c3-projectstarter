@@ -1,12 +1,12 @@
 - name: Transfer Zipped file
   copy:
-    src: ./artifact.tar.gz
+    src: ./backend.tar.gz
     dest: /home/ubuntu/
 
 - name: Untar file
   shell: |
     cd /home/ubuntu
-    tar -xvzf artifact.tar.gz
+    tar -xvzf backend.tar.gz
   
 - name: "Update npm"
   become: true
