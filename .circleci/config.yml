@@ -317,6 +317,31 @@ jobs:
             cd .circleci/ansible
             ansible-playbook -i inventory.txt deploy-backend.yml
 
+  smoke-test-backend:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            cd backend
+            apk add --update ansible
+            apk add --update tar gzip ansible nodejs npm curl jq
+            pip install awscli
+
+      - run:
+          name: Get backend url and do some test
+          command: |
+            cd backend
+            export BACKENDIP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:Name,Values=backend-${WorkFlowID}" --output text)
+            export BACKENDDNS=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicDnsName' --filters "Name=tag:Name,Values=backend-${WorkFlowID}" --output text)
+
+            echo "BACKENDIP: ${BACKENDIP}"
+            echo "BACKENDNS: ${BACKENDDNS}"
+            echo "BACKENDIP: ${API_URL}"
+            echo "http://${BACKENDIP}:3030"
+            curl "http://${BACKENDIP}:3030/api/status"
 
 workflows:
   default:
