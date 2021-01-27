@@ -403,7 +403,6 @@ jobs:
             yum install gzip -y
             yum install python3-pip -y
             yum -y install curl -y
-            yum install -y nodejs
 
       - run: 
           name: promote the new deployment
