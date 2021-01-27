@@ -391,6 +391,27 @@ jobs:
       - revert-migrations:
           workflow_id: ${WorkFlowID}
 
+  cloudfront-update:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run: 
+          name: Install dependencies
+          command: |
+            yum install tar -y
+            yum install gzip -y
+            yum install python3-pip -y
+            yum -y install curl -y
+            yum install -y nodejs
+
+      - run: 
+          name: promote the new deployment
+          command: |
+            echo "Create/Update CloudFront"
+            aws cloudformation deploy --stack-name udapeople-cloudfront --template-file .circleci/files/cloudfront.yml --region ${AWS_DEFAULT_REGION} --parameter-overrides WorkflowID="pcwdesqsd"
+
+
 workflows:
   default:
     jobs:
