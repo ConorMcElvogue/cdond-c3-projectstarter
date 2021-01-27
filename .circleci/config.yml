@@ -408,7 +408,7 @@ jobs:
           name: promote the new deployment
           command: |
             echo "Create/Update CloudFront"
-            aws cloudformation deploy --stack-name udapeople-cloudfront --template-file .circleci/files/cloudfront.yml --region ${AWS_DEFAULT_REGION} --parameter-overrides WorkflowID="pcwdesqsd"
+            aws cloudformation deploy --stack-name udapeople-cloudfront --template-file .circleci/files/cloudfront.yml --region ${AWS_DEFAULT_REGION} --parameter-overrides ID="pcwdesqsd"
 
 
 workflows:
