@@ -458,10 +458,16 @@ workflows:
       - deploy-backend:
           requires:
             - run-migrations
-      - smoke-test:
+
+      - cloudfront-update:
           requires:
-            - deploy-frontend
-            - deploy-backend
-          filters:
-            branches:
-              only: master
+           - deploy-frontend
+           - deploy-backend
+
+     # - smoke-test:
+     #     requires:
+     #       - deploy-frontend
+     #       - deploy-backend
+     #     filters:
+     #       branches:
+     #         only: master
