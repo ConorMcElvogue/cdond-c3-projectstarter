@@ -344,6 +344,20 @@ jobs:
       - add_ssh_keys:
           fingerprints: ["d8:5b:b9:b0:64:bc:92:e2:7f:b6:da:62:da:e3:2c:5e"]
       - run:
+          name: Set up env vars
+          command: |
+            echo ENVIRONMENT=production > backend/.env
+            echo TYPEORM_CONNECTION=postgres >> backend/.env
+            echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> backend/.env
+            echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> backend/.env
+            echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> backend.env
+            echo TYPEORM_HOST=${TYPEORM_HOST} >> backend/.env
+            echo TYPEORM_PORT=${TYPEORM_PORT} >> backend/.env
+            echo TYPEORM_USERNAME=${TYPEORM_USERNAME} >> backend/.env
+            echo TYPEORM_PASSWORD=${TYPEORM_PASSWORD} >> backend/.env
+            echo TYPEORM_DATABASE=${TYPEORM_DATABASE} >> backend/.env
+            cat backend/.env
+      - run:
           name: Set up inventory file
           command: |
             cd .circleci/ansible
@@ -387,7 +401,7 @@ jobs:
       - run:
           name: Smoke test on frontend
           command: |
-            URL="http://udapeople-s3bucket-${WorkFlowID}.s3-website.eu-west-2.amazonaws.com/#/employees"
+            URL="http://udapeople-${WorkFlowID}.s3-website.eu-west-2.amazonaws.com/#/employees"
             if curl -s ${URL} | grep "Welcome"
             then
               return 0
