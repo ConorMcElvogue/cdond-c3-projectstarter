@@ -394,10 +394,10 @@ jobs:
             else
               return 1
             fi
-      - destroy-environment:
-          workflow_id: ${WorkFlowID}
-      - revert-migrations:
-          workflow_id: ${WorkFlowID}
+     # - destroy-environment:
+     #     workflow_id: ${WorkFlowID}
+     # - revert-migrations:
+     #     workflow_id: ${WorkFlowID}
 
   cloudfront-update:
     docker:
