@@ -8,13 +8,12 @@
 - name: "install package"
   shell: |
     cd /home/ubuntu/backend
-    npm install
+    sudo npm install
 
 - name: "run migrations"
   shell: |
     cd /home/ubuntu/backend
-    npm run migrations > migrations.txt
-    cat migrations.txt
+    sudo npm run migrations > migrations.txt
 
 - name: Start PM2
   shell: |
