@@ -13,7 +13,7 @@
 - name: "run migrations"
   shell: |
     cd /home/ubuntu/backend
-    sudo npm run migrations > migrations.txt
+    sudo npm run migrations
 
 - name: Start PM2
   shell: |
