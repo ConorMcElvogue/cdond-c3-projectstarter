@@ -501,20 +501,24 @@ workflows:
       - configure-infrastructure:
           requires:
             - deploy-infrastructure
-      - run-migrations:
+#      - run-migrations:
+#          requires:
+#            - test-backend
+#            - test-frontend
+#            - analyze-backend
+#            - analyze-frontend
+#            - configure-infrastructure
+#          filters:
+#            branches:
+#              only:
+#                - master
+      - deploy-backend:
           requires:
             - test-backend
             - test-frontend
             - analyze-backend
             - analyze-frontend
             - configure-infrastructure
-          filters:
-            branches:
-              only:
-                - master
-      - deploy-backend:
-          requires:
-            - run-migrations
       - deploy-frontend:
           requires:
             - deploy-backend
